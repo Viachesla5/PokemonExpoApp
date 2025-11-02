@@ -89,60 +89,30 @@ export default function PokemonDetailScreen() {
   const { data: pokemon, isLoading, error } = usePokemonByName(name as string);
   
   const speciesUrl = useMemo(() => {
-    if (!pokemon?.species) {
-      console.log('No species found in pokemon:', pokemon);
-      return null;
-    }
+    if (!pokemon?.species) return null;
     if (typeof pokemon.species === 'string') return pokemon.species;
     if (typeof pokemon.species === 'object' && 'url' in pokemon.species) {
-      const url = pokemon.species.url || null;
-      console.log('Species URL extracted:', url);
-      return url;
+      return pokemon.species.url || null;
     }
-    console.log('Species is not in expected format:', pokemon.species);
     return null;
   }, [pokemon]);
   
-  const { data: species, isLoading: isLoadingSpecies, error: speciesError } = usePokemonSpecies(speciesUrl);
-  
-  useEffect(() => {
-    if (speciesError) {
-      console.error('Error fetching species:', speciesError);
-    }
-    if (species) {
-      console.log('Species data:', species);
-      console.log('Evolution chain URL:', species?.evolution_chain?.url);
-    }
-  }, [species, speciesError]);
+  const { data: species, isLoading: isLoadingSpecies } = usePokemonSpecies(speciesUrl);
   
   const evolutionChainUrl = useMemo(() => {
-    const url = species?.evolution_chain?.url || null;
-    console.log('Evolution chain URL from species:', url);
-    return url;
+    return species?.evolution_chain?.url || null;
   }, [species]);
   
-  const { data: evolutionChainData, isLoading: isLoadingEvolution, error: evolutionError } = useEvolutionChain(evolutionChainUrl);
-  
-  useEffect(() => {
-    if (evolutionError) {
-      console.error('Error fetching evolution chain:', evolutionError);
-    }
-    if (evolutionChainData) {
-      console.log('Evolution chain data:', evolutionChainData);
-      console.log('Chain:', evolutionChainData?.chain);
-    }
-  }, [evolutionChainData, evolutionError]);
+  const { data: evolutionChainData, isLoading: isLoadingEvolution } = useEvolutionChain(evolutionChainUrl);
   const [evolutionChain, setEvolutionChain] = useState<EvolutionChainItem[]>([]);
   const [isParsingEvolution, setIsParsingEvolution] = useState(false);
 
   useEffect(() => {
     const loadEvolutionChain = async () => {
       if (evolutionChainData?.chain) {
-        console.log('Starting to parse evolution chain:', evolutionChainData.chain);
         setIsParsingEvolution(true);
         try {
           const parsed = await parseEvolutionChainAsync(evolutionChainData.chain);
-          console.log('Parsed evolution chain:', parsed);
           setEvolutionChain(parsed);
         } catch (error) {
           console.error('Error parsing evolution chain:', error);
@@ -151,7 +121,6 @@ export default function PokemonDetailScreen() {
           setIsParsingEvolution(false);
         }
       } else {
-        console.log('No evolution chain data available');
         setEvolutionChain([]);
         setIsParsingEvolution(false);
       }
