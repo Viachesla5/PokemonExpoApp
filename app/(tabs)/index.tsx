@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePokemonList } from '@/hooks/use-pokemon';
 import PokemonList from '@/components/ui/pokemon-list';
 import type { Pokemon } from '@/components/ui/pokemon-list';
+import { Fonts } from '@/constants/fonts';
 
 export default function AllPokemonScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -121,6 +122,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    fontFamily: Fonts.regular,
     color: '#333333',
     padding: 0,
   },
@@ -131,7 +133,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: Fonts.bold,
     color: '#212121',
     textAlign: 'left',
   },
@@ -144,10 +146,12 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+    fontFamily: Fonts.regular,
     color: '#666666',
   },
   errorText: {
     fontSize: 16,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     color: '#666666',
   },

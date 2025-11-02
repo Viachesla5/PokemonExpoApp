@@ -6,6 +6,7 @@ import { useFavorites } from '@/hooks/use-favorites';
 import PokemonList from '@/components/ui/pokemon-list';
 import type { Pokemon } from '@/components/ui/pokemon-list';
 import FavoritesStats from '@/components/ui/favorites-stats';
+import { Fonts } from '@/constants/fonts';
 
 export default function FavoritesScreen() {
   const { data: favorites, isLoading, error } = useFavorites();
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: Fonts.bold,
     color: '#0E0940',
     marginBottom: 4,
   },
@@ -108,6 +109,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: Fonts.regular,
     color: '#666',
   },
   subtitleDark: {
@@ -122,6 +124,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
+    fontFamily: Fonts.regular,
     color: '#EF5350',
   },
   textDark: {
@@ -135,13 +138,14 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: Fonts.bold,
     color: '#666',
     marginBottom: 8,
     textAlign: 'center',
   },
   emptySubtext: {
     fontSize: 16,
+    fontFamily: Fonts.regular,
     color: '#999',
     textAlign: 'center',
     lineHeight: 22,
@@ -155,7 +159,7 @@ const styles = StyleSheet.create({
   },
   listHeaderText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
     color: '#0E0940',
   },
   listHeaderTextDark: {

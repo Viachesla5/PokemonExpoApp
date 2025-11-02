@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from '
 import { useRouter } from 'expo-router';
 import { PokemonImage } from './pokemon-image';
 import Favorite from './favorite';
+import { Fonts } from '@/constants/fonts';
 
 export type Pokemon = {
   id: number;
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
   idText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: 'bold',
+    fontFamily: Fonts.bold,
   },
   cardNameSection: {
     padding: 12,
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
   },
   pokemonName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: Fonts.semiBold,
     color: '#212121',
     marginBottom: 4,
     textAlign: 'center',
@@ -200,6 +201,7 @@ const styles = StyleSheet.create({
   },
   pokemonType: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
     color: '#757575',
     textAlign: 'center',
   },

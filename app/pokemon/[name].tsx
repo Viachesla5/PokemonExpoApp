@@ -10,6 +10,7 @@ import { PokemonImage } from '@/components/ui/pokemon-image';
 import { PokemonSkeleton } from '@/components/ui/pokemon-skeleton';
 import FavoriteHeader from '@/components/ui/favorite-header';
 import { PokeApiService } from '@/services/pokemon-api';
+import { Fonts } from '@/constants/fonts';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -589,6 +590,7 @@ const styles = StyleSheet.create({
   },
   headerId: {
     fontSize: 16,
+    fontFamily: Fonts.medium,
     color: '#A4A4A4',
     marginTop: 4,
   },
@@ -599,7 +601,7 @@ const styles = StyleSheet.create({
   },
   pokemonName: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: Fonts.bold,
     color: '#212121',
     textTransform: 'capitalize',
   },
@@ -625,8 +627,8 @@ const styles = StyleSheet.create({
   },
   typeText: {
     fontSize: 14,
+    fontFamily: Fonts.medium,
     color: '#212121',
-    fontWeight: '500',
     textTransform: 'capitalize',
   },
   imageContainer: {
@@ -646,12 +648,12 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
+    fontFamily: Fonts.medium,
     color: '#A4A4A4',
-    fontWeight: '500',
   },
   tabTextActive: {
+    fontFamily: Fonts.semiBold,
     color: '#212121',
-    fontWeight: '600',
   },
   tabUnderline: {
     position: 'absolute',
@@ -681,13 +683,13 @@ const styles = StyleSheet.create({
   },
   detailKey: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: Fonts.semiBold,
     color: '#212121',
   },
   detailValue: {
     fontSize: 16,
+    fontFamily: Fonts.regular,
     color: '#212121',
-    fontWeight: '400',
     textTransform: 'capitalize',
   },
   statRow: {
@@ -698,7 +700,7 @@ const styles = StyleSheet.create({
   },
   statName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
     color: '#212121',
     width: 100,
   },
@@ -720,6 +722,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
+    fontFamily: Fonts.regular,
     color: '#A4A4A4',
     width: 40,
     textAlign: 'right',
@@ -752,11 +755,11 @@ const styles = StyleSheet.create({
   evolutionIdText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
   },
   evolutionName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
     color: '#212121',
     textTransform: 'capitalize',
   },
@@ -779,10 +782,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
+    fontFamily: Fonts.regular,
     color: '#212121',
   },
   noEvolutionText: {
     fontSize: 16,
+    fontFamily: Fonts.regular,
     color: '#A4A4A4',
     textAlign: 'center',
     paddingVertical: 40,

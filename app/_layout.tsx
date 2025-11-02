@@ -4,11 +4,13 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { View } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { databaseService } from '@/services/database';
+import { useCustomFonts } from '@/hooks/use-fonts';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,10 +27,15 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { fontsLoaded, fontError } = useCustomFonts();
 
   useEffect(() => {
     databaseService.initDatabase().catch(console.error);
   }, []);
+
+  if (!fontsLoaded && !fontError) {
+    return <View />;
+  }
 
   return (
     <ErrorBoundary>
