@@ -1,10 +1,11 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useFavorites } from '@/hooks/use-favorites';
 import PokemonList from '@/components/ui/pokemon-list';
 import type { Pokemon } from '@/components/ui/pokemon-list';
+import FavoritesStats from '@/components/ui/favorites-stats';
 
 export default function FavoritesScreen() {
   const { data: favorites, isLoading, error } = useFavorites();
@@ -53,13 +54,25 @@ export default function FavoritesScreen() {
 
   return (
     <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, isDark && styles.titleDark]}>My Favorites</Text>
-        <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>
-          {favorites.length} {favorites.length === 1 ? 'Pokémon' : 'Pokémon'} saved
-        </Text>
-      </View>
-      <PokemonList data={pokemonData} />
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={[0]}
+      >
+        <View style={[styles.header, isDark && styles.headerDark]}>
+          <Text style={[styles.title, isDark && styles.titleDark]}>My Favorites</Text>
+          <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>
+            {favorites.length} {favorites.length === 1 ? 'Pokémon' : 'Pokémon'} saved
+          </Text>
+        </View>
+        <FavoritesStats favorites={favorites} />
+        <View style={styles.listHeader}>
+          <Text style={[styles.listHeaderText, isDark && styles.listHeaderTextDark]}>
+            Your Favorite Pokémon
+          </Text>
+        </View>
+        <PokemonList data={pokemonData} scrollEnabled={false} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -72,10 +85,17 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#1a1a2e',
   },
+  scrollView: {
+    flex: 1,
+  },
   header: {
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
+    backgroundColor: '#f0f8ff',
+  },
+  headerDark: {
+    backgroundColor: '#1a1a2e',
   },
   title: {
     fontSize: 32,
@@ -128,6 +148,18 @@ const styles = StyleSheet.create({
   },
   emptySubtextDark: {
     color: '#CCCCCC',
+  },
+  listHeader: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  listHeaderText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#0E0940',
+  },
+  listHeaderTextDark: {
+    color: '#FFFFFF',
   },
 });
 

@@ -1,6 +1,7 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useIsFavorite } from '@/hooks/use-favorites';
 import { useToggleFavorite } from '@/hooks/use-favorites';
 
@@ -16,6 +17,16 @@ export default function Favorite({ pokemonId, pokemonName, imageUrl }: FavoriteP
 
   const handleToggle = () => {
     if (isLoading || toggleFavorite.isPending) return;
+
+    if (Platform.OS === 'ios') {
+      if (isFavorited) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } else if (Platform.OS === 'android') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
 
     toggleFavorite.mutate({
       pokemonId,

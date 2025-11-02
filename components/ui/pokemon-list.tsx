@@ -15,6 +15,7 @@ type PokemonListProps = {
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
   hasNextPage?: boolean;
+  scrollEnabled?: boolean;
 };
 
 type PokemonCardProps = {
@@ -66,6 +67,7 @@ export default function PokemonList({
   onLoadMore, 
   isLoadingMore = false,
   hasNextPage = false,
+  scrollEnabled = true,
 }: PokemonListProps) {
   const router = useRouter();
 
@@ -111,6 +113,8 @@ export default function PokemonList({
       updateCellsBatchingPeriod={50}
       windowSize={10}
       initialNumToRender={20}
+      scrollEnabled={scrollEnabled}
+      nestedScrollEnabled={!scrollEnabled}
     />
   );
 }
