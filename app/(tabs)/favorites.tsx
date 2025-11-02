@@ -14,7 +14,7 @@ export default function FavoritesScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+      <SafeAreaView style={[styles.container, isDark && styles.containerDark]} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
           <Text style={[styles.title, isDark && styles.titleDark]}>My Favorites</Text>
         </View>
@@ -30,7 +30,7 @@ export default function FavoritesScreen() {
 
   if (error || !favorites || favorites.length === 0) {
     return (
-      <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+      <SafeAreaView style={[styles.container, isDark && styles.containerDark]} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
           <Text style={[styles.title, isDark && styles.titleDark]}>My Favorites</Text>
         </View>
@@ -53,7 +53,7 @@ export default function FavoritesScreen() {
   }));
 
   return (
-    <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+    <SafeAreaView style={[styles.container, isDark && styles.containerDark]} edges={['top', 'left', 'right']}>
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}

@@ -8,7 +8,7 @@ import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-g
 import { usePokemonByName, usePokemonSpecies, useEvolutionChain } from '@/hooks/use-pokemon';
 import { PokemonImage } from '@/components/ui/pokemon-image';
 import { PokemonSkeleton } from '@/components/ui/pokemon-skeleton';
-import FavoriteHeader from '@/components/ui/favorite-header';
+import FavoriteHeader from '@/components/ui/favorite';
 import { PokeApiService } from '@/services/pokemon-api';
 import { Fonts } from '@/constants/fonts';
 
@@ -357,12 +357,12 @@ export default function PokemonDetailScreen() {
         `Base XP: ${baseExperience}\n\n` +
         `${imageUrl}`;
 
-      const result = await Share.share({
+      await Share.share({
         message: shareMessage,
         title: `${pokemonDisplayName} - Pokédex`,
         url: imageUrl,
       });
-    } catch (error: any) {
+    } catch {
       Alert.alert('Error', 'Failed to share Pokémon');
     }
   };

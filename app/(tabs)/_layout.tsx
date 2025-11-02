@@ -1,10 +1,13 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Image } from 'react-native';
+import { Image, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/haptic-tab';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+  
   return (
     <Tabs
       screenOptions={{
@@ -20,14 +23,14 @@ export default function TabLayout() {
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.15,
           shadowRadius: 8,
-          height: 80,
-          paddingBottom: 0,
+          height: 80 + insets.bottom,
+          paddingBottom: Platform.OS === 'ios' ? insets.bottom : 8,
           paddingTop: 12,
         },
         tabBarItemStyle: {
           padding: 0,
           margin: 0,
-          height: 98,
+          justifyContent: 'center',
         },
         tabBarLabelStyle: {
           fontSize: 14,

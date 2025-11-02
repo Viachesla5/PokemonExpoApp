@@ -54,7 +54,7 @@ export default function AllPokemonScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#9C27B0" />
           <Text style={styles.loadingText}>
@@ -67,7 +67,7 @@ export default function AllPokemonScreen() {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.centerContainer}>
           <Text style={styles.errorText}>
             Error loading Pokemon: {error.message}
@@ -78,7 +78,7 @@ export default function AllPokemonScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#666666" style={styles.searchIcon} />
