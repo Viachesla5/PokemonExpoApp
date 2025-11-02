@@ -2,7 +2,6 @@ import React, { useCallback, useMemo } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { PokemonImage } from './pokemon-image';
-import Favorite from './favorite';
 import { Fonts } from '@/constants/fonts';
 
 export type Pokemon = {
@@ -26,7 +25,6 @@ type PokemonCardProps = {
 
 const PokemonCard = React.memo(({ item, onPress }: PokemonCardProps) => {
   const formattedId = useMemo(() => item.id.toString().padStart(3, '0'), [item.id]);
-  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${item.id}.png`;
 
   return (
     <Pressable
@@ -36,26 +34,23 @@ const PokemonCard = React.memo(({ item, onPress }: PokemonCardProps) => {
       ]}
       onPress={() => onPress(item.name)}
     >
-      <View style={styles.cardBackground}>
-        <View style={styles.topRow}>
-          <View style={styles.idBadge}>
-            <Text style={styles.idText}>#{formattedId}</Text>
-          </View>
-          <View style={styles.favoriteContainer}>
-            <Favorite
-              pokemonId={item.id}
-              pokemonName={item.name}
-              imageUrl={imageUrl}
-            />
-          </View>
+      <View style={styles.cardTop}>
+        <View style={styles.idBadge}>
+          <Text style={styles.idText}>{formattedId}</Text>
         </View>
         <View style={styles.imageWrapper}>
-          <PokemonImage id={item.id} size={140} variant="pixelated" />
+          <PokemonImage id={item.id} size={160} variant="pixelated" />
         </View>
       </View>
-      <View style={styles.cardNameSection}>
-        <Text style={styles.pokemonName}>{item.name}</Text>
-        <Text style={styles.pokemonType}>{item.type}</Text>
+      <View style={styles.cardBottom}>
+        <Text style={styles.pokemonName} numberOfLines={1}>{item.name}</Text>
+        <Pressable style={styles.menuButton} hitSlop={8}>
+          <View style={styles.menuDots}>
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+          </View>
+        </Pressable>
       </View>
     </Pressable>
   );
@@ -122,88 +117,84 @@ export default function PokemonList({
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingBottom: 20,
-    paddingTop: 8,
+    paddingTop: 4,
   },
   row: {
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   pokemonCard: {
     flex: 1,
     maxWidth: '48%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    overflow: 'hidden',
+    borderRadius: 16,
     marginHorizontal: 4,
+    overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   pokemonCardPressed: {
-    opacity: 0.8,
+    opacity: 0.7,
   },
-  cardBackground: {
-    backgroundColor: '#E1BEE7',
-    aspectRatio: 1.2,
-    padding: 12,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    position: 'relative',
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    zIndex: 2,
-  },
-  imageWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  favoriteContainer: {
-    zIndex: 2,
+  cardTop: {
+    backgroundColor: '#E8DEF8',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
   },
   idBadge: {
-    backgroundColor: '#9C27B0',
-    paddingHorizontal: 8,
+    backgroundColor: '#5631E8',
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
-    zIndex: 1,
+    alignSelf: 'flex-start',
+    marginBottom: 4,
   },
   idText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: Fonts.bold,
   },
-  cardNameSection: {
-    padding: 12,
+  imageWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  cardBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: '#FFFFFF',
   },
   pokemonName: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Fonts.semiBold,
-    color: '#212121',
-    marginBottom: 4,
-    textAlign: 'center',
+    color: '#000000',
     textTransform: 'capitalize',
+    flex: 1,
   },
-  pokemonType: {
-    fontSize: 12,
-    fontFamily: Fonts.regular,
-    color: '#757575',
-    textAlign: 'center',
+  menuButton: {
+    padding: 4,
+  },
+  menuDots: {
+    flexDirection: 'column',
+    gap: 3,
+  },
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#000000',
   },
   footerLoader: {
     paddingVertical: 20,

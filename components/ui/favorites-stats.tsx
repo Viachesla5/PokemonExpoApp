@@ -4,6 +4,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { FavoritePokemon } from '@/services/database';
 import { useQueries } from '@tanstack/react-query';
 import { PokeApiService } from '@/services/pokemon-api';
+import { Fonts } from '@/constants/fonts';
 
 interface FavoritesStatsProps {
   favorites: FavoritePokemon[];
@@ -11,16 +12,16 @@ interface FavoritesStatsProps {
 
 const getTypeColor = (typeName: string): string => {
   const typeColors: { [key: string]: string } = {
-    electric: '#FDD835',
-    fire: '#F44336',
+    electric: '#FFCB05',
+    fire: '#FF0000',
     water: '#2196F3',
-    grass: '#4CAF50',
-    ghost: '#9C27B0',
+    grass: '#6CBB5C',
+    ghost: '#A33EA1',
     psychic: '#E91E63',
     normal: '#A8A878',
     fighting: '#C03028',
     flying: '#A890F0',
-    poison: '#A040A0',
+    poison: '#A33EA1',
     ground: '#E0C068',
     rock: '#B8A038',
     bug: '#A8B820',
@@ -183,18 +184,23 @@ export default function FavoritesStats({ favorites }: FavoritesStatsProps) {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 12,
+    borderRadius: 16,
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   containerDark: {
     backgroundColor: '#2A2A3E',
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#0E0940',
+    fontSize: 18,
+    fontFamily: Fonts.bold,
+    color: '#000000',
     marginBottom: 16,
   },
   sectionTitleDark: {
@@ -211,23 +217,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     backgroundColor: '#F5F5F5',
-    borderRadius: 8,
+    borderRadius: 12,
   },
   statCardDark: {
     backgroundColor: '#3A3A3A',
   },
   statValue: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0E0940',
+    fontFamily: Fonts.bold,
+    color: '#000000',
     marginBottom: 4,
   },
   statValueDark: {
     color: '#FFFFFF',
   },
   statLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 11,
+    fontFamily: Fonts.regular,
+    color: '#666666',
     textAlign: 'center',
   },
   statLabelDark: {
@@ -238,9 +245,9 @@ const styles = StyleSheet.create({
   },
   subsectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#0E0940',
-    marginBottom: 8,
+    fontFamily: Fonts.semiBold,
+    color: '#000000',
+    marginBottom: 12,
   },
   subsectionTitleDark: {
     color: '#FFFFFF',
@@ -251,18 +258,18 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   generationBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#E1BEE7',
-    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: '#E8DEF8',
+    borderRadius: 20,
   },
   generationBadgeDark: {
     backgroundColor: '#7B1FA2',
   },
   generationText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#0E0940',
+    fontSize: 14,
+    fontFamily: Fonts.semiBold,
+    color: '#000000',
   },
   generationTextDark: {
     color: '#FFFFFF',
@@ -276,13 +283,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   typeBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   typeText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 14,
+    fontFamily: Fonts.semiBold,
     color: '#FFFFFF',
     textTransform: 'capitalize',
   },

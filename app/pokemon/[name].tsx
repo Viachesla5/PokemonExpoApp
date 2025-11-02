@@ -316,7 +316,9 @@ export default function PokemonDetailScreen() {
         {evolutionChain.map((evolution, index) => (
           <View key={evolution.id}>
             <View style={styles.evolutionCard}>
-              <PokemonImage id={evolution.id} size={80} variant="pixelated" />
+              <View style={styles.evolutionImageContainer}>
+                <PokemonImage id={evolution.id} size={80} variant="pixelated" />
+              </View>
               <View style={styles.evolutionInfo}>
                 <View style={styles.evolutionIdBadge}>
                   <Text style={styles.evolutionIdText}>{evolution.id.toString().padStart(3, '0')}</Text>
@@ -420,140 +422,142 @@ export default function PokemonDetailScreen() {
             <Ionicons name="arrow-back" size={24} color="#212121" />
           </Pressable>
         
-        <View style={styles.headerRight}>
-          <View style={styles.headerActions}>
-            <Pressable onPress={handleShare} style={styles.shareButton}>
-              <Ionicons name="share-social-outline" size={24} color="#212121" />
-            </Pressable>
-            <FavoriteHeader
-              pokemonId={pokemon.id}
-              pokemonName={pokemon.name}
-              imageUrl={imageUrl}
-            />
-          </View>
-          <Text style={styles.headerId}>{formattedId}</Text>
-        </View>
-      </View>
-
-      <ScrollView 
-        style={styles.scrollView} 
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-      >
-        <View style={styles.nameContainer}>
-          <Text style={styles.pokemonName}>{pokemonDisplayName}</Text>
+          <Pressable onPress={handleShare} style={styles.shareButton}>
+            <Ionicons name="share-social-outline" size={24} color="#212121" />
+          </Pressable>
+          <FavoriteHeader
+            pokemonId={pokemon.id}
+            pokemonName={pokemon.name}
+            imageUrl={imageUrl}
+          />
         </View>
 
-        <View style={styles.typeContainer}>
-          {pokemon.types.map((typeInfo, index) => {
-            const typeColor = getTypeCircleColor(typeInfo.type.name);
-            return (
-              <View key={index} style={styles.typeTag}>
-                <View style={[styles.typeCircle, { backgroundColor: typeColor }]} />
-                <Text style={styles.typeText}>
-                  {typeInfo.type.name.charAt(0).toUpperCase() + typeInfo.type.name.slice(1)}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-
-        <View style={styles.imageContainer}>
-          <PokemonImage id={pokemon.id} size={280} />
-        </View>
-
-        <View style={styles.tabsContainer}>
-          <TouchableOpacity
-            style={styles.tab}
-            onPress={() => setActiveTab('about')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'about' && styles.tabTextActive]}>
-              About
-            </Text>
-            {activeTab === 'about' && <View style={styles.tabUnderline} />}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.tab}
-            onPress={() => setActiveTab('stats')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'stats' && styles.tabTextActive]}>
-              Stats
-            </Text>
-            {activeTab === 'stats' && <View style={styles.tabUnderline} />}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.tab}
-            onPress={() => setActiveTab('evolution')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'evolution' && styles.tabTextActive]}>
-              Evolution
-            </Text>
-            {activeTab === 'evolution' && <View style={styles.tabUnderline} />}
-          </TouchableOpacity>
-        </View>
-        <View style={styles.tabSeparator} />
-
-        <PanGestureHandler
-          onHandlerStateChange={handleSwipe}
-          activeOffsetX={[-10, 10]}
+        <ScrollView 
+          style={styles.scrollView} 
+          showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
         >
-          <Animated.View
-            style={{
-              transform: [
-                {
-                  translateX: Animated.add(
-                    translateX,
-                    tabAnimatedValue.interpolate({
-                      inputRange: [0, 1, 2],
-                      outputRange: [0, -SCREEN_WIDTH, -SCREEN_WIDTH * 2],
-                    })
-                  ),
-                },
-              ],
-              flexDirection: 'row',
-              width: SCREEN_WIDTH * 3,
-            }}
+          <View style={styles.contentWrapper}>
+            <View style={styles.topSection}>
+              <View style={styles.nameIdContainer}>
+                <Text style={styles.pokemonName}>{pokemonDisplayName}</Text>
+                <Text style={styles.pokemonId}>{formattedId}</Text>
+              </View>
+
+              <View style={styles.typeContainer}>
+                {pokemon.types.map((typeInfo, index) => {
+                  const typeColor = getTypeCircleColor(typeInfo.type.name);
+                  return (
+                    <View key={index} style={styles.typeTag}>
+                      <View style={[styles.typeCircle, { backgroundColor: typeColor }]} />
+                      <Text style={styles.typeText}>
+                        {typeInfo.type.name.charAt(0).toUpperCase() + typeInfo.type.name.slice(1)}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+
+            <View style={styles.imageContainer}>
+              <PokemonImage id={pokemon.id} size={280} />
+            </View>
+
+            <View style={styles.bottomSection}>
+          <View style={styles.tabsContainer}>
+            <TouchableOpacity
+              style={styles.tab}
+              onPress={() => setActiveTab('about')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.tabText, activeTab === 'about' && styles.tabTextActive]}>
+                About
+              </Text>
+              {activeTab === 'about' && <View style={styles.tabUnderline} />}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.tab}
+              onPress={() => setActiveTab('stats')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.tabText, activeTab === 'stats' && styles.tabTextActive]}>
+                Stats
+              </Text>
+              {activeTab === 'stats' && <View style={styles.tabUnderline} />}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.tab}
+              onPress={() => setActiveTab('evolution')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.tabText, activeTab === 'evolution' && styles.tabTextActive]}>
+                Evolution
+              </Text>
+              {activeTab === 'evolution' && <View style={styles.tabUnderline} />}
+            </TouchableOpacity>
+          </View>
+          <View style={styles.tabSeparator} />
+
+          <PanGestureHandler
+            onHandlerStateChange={handleSwipe}
+            activeOffsetX={[-10, 10]}
           >
             <Animated.View
               style={{
-                width: SCREEN_WIDTH,
-                opacity: tabAnimatedValue.interpolate({
-                  inputRange: [0, 0.5, 1],
-                  outputRange: [1, 0.3, 0],
-                }),
+                transform: [
+                  {
+                    translateX: Animated.add(
+                      translateX,
+                      tabAnimatedValue.interpolate({
+                        inputRange: [0, 1, 2],
+                        outputRange: [0, -SCREEN_WIDTH, -SCREEN_WIDTH * 2],
+                      })
+                    ),
+                  },
+                ],
+                flexDirection: 'row',
+                width: SCREEN_WIDTH * 3,
               }}
             >
-              {renderAboutTab()}
+              <Animated.View
+                style={{
+                  width: SCREEN_WIDTH,
+                  opacity: tabAnimatedValue.interpolate({
+                    inputRange: [0, 0.5, 1],
+                    outputRange: [1, 0.3, 0],
+                  }),
+                }}
+              >
+                {renderAboutTab()}
+              </Animated.View>
+              <Animated.View
+                style={{
+                  width: SCREEN_WIDTH,
+                  opacity: tabAnimatedValue.interpolate({
+                    inputRange: [0, 1, 2],
+                    outputRange: [0, 1, 0],
+                  }),
+                }}
+              >
+                {renderStatsTab()}
+              </Animated.View>
+              <Animated.View
+                style={{
+                  width: SCREEN_WIDTH,
+                  opacity: tabAnimatedValue.interpolate({
+                    inputRange: [1, 1.5, 2],
+                    outputRange: [0, 0.3, 1],
+                  }),
+                }}
+              >
+                {renderEvolutionTab()}
+              </Animated.View>
             </Animated.View>
-            <Animated.View
-              style={{
-                width: SCREEN_WIDTH,
-                opacity: tabAnimatedValue.interpolate({
-                  inputRange: [0, 1, 2],
-                  outputRange: [0, 1, 0],
-                }),
-              }}
-            >
-              {renderStatsTab()}
-            </Animated.View>
-            <Animated.View
-              style={{
-                width: SCREEN_WIDTH,
-                opacity: tabAnimatedValue.interpolate({
-                  inputRange: [1, 1.5, 2],
-                  outputRange: [0, 0.3, 1],
-                }),
-              }}
-            >
-              {renderEvolutionTab()}
-            </Animated.View>
-          </Animated.View>
-        </PanGestureHandler>
-      </ScrollView>
-    </SafeAreaView>
+          </PanGestureHandler>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }
@@ -561,40 +565,46 @@ export default function PokemonDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#EDF6FF',
   },
   scrollView: {
     flex: 1,
   },
+  contentWrapper: {
+    position: 'relative',
+  },
+  topSection: {
+    backgroundColor: '#EDF6FF',
+    paddingBottom: 20,
+  },
+  bottomSection: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    marginTop: -93,
+    paddingTop: 113,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 8,
+    paddingBottom: 16,
+    backgroundColor: '#EDF6FF',
   },
   backButton: {
     padding: 4,
-  },
-  headerRight: {
-    alignItems: 'flex-end',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    marginRight: 'auto',
   },
   shareButton: {
     padding: 4,
+    marginLeft: 'auto',
   },
-  headerId: {
-    fontSize: 16,
-    fontFamily: Fonts.medium,
-    color: '#A4A4A4',
-    marginTop: 4,
-  },
-  nameContainer: {
+  nameIdContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 12,
@@ -604,6 +614,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     color: '#212121',
     textTransform: 'capitalize',
+  },
+  pokemonId: {
+    fontSize: 32,
+    fontFamily: Fonts.light,
+    fontWeight: '300',
+    color: '#A4A4A4',
   },
   typeContainer: {
     flexDirection: 'row',
@@ -615,30 +631,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#E9ECEF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
-    gap: 6,
+    gap: 8,
   },
   typeCircle: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   typeText: {
-    fontSize: 14,
-    fontFamily: Fonts.medium,
+    fontSize: 16,
+    fontFamily: Fonts.bold,
     color: '#212121',
     textTransform: 'capitalize',
   },
   imageContainer: {
     alignItems: 'center',
     paddingVertical: 20,
-    marginBottom: 20,
+    zIndex: 10,
+    position: 'relative',
   },
   tabsContainer: {
     flexDirection: 'row',
     paddingHorizontal: 20,
+    paddingTop: 20,
     paddingBottom: 12,
   },
   tab: {
@@ -676,8 +694,7 @@ const styles = StyleSheet.create({
   },
   detailRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingVertical: 12,
     borderBottomWidth: 0,
   },
@@ -685,12 +702,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.semiBold,
     color: '#212121',
+    width: 100,
   },
   detailValue: {
     fontSize: 16,
     fontFamily: Fonts.regular,
     color: '#212121',
     textTransform: 'capitalize',
+    flex: 1,
+    textAlign: 'left',
   },
   statRow: {
     flexDirection: 'row',
@@ -740,12 +760,20 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  evolutionImageContainer: {
+    backgroundColor: '#F6F6FF',
+    borderRadius: 12,
+    width: 96,
+    height: 96,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   evolutionInfo: {
     marginLeft: 16,
     flex: 1,
   },
   evolutionIdBadge: {
-    backgroundColor: '#6C79DB',
+    backgroundColor: '#5631E8',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,

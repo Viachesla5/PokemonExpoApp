@@ -1,52 +1,33 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { CustomTabButton } from '@/components/custom-tab-button';
+
+import { HapticTab } from '@/components/haptic-tab';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
+  const colorScheme = useColorScheme();
+
   return (
     <Tabs
-      initialRouteName="index"
       screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#E3F2FD',
-          borderTopWidth: 0,
-          elevation: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
+        tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Pokémons',
-          tabBarButton: (props) => (
-            <CustomTabButton
-              {...props}
-              iconName="ellipse-outline"
-              iconNameFocused="radio-button-on"
-              label="Pokémons"
-            />
-          ),
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="favorites"
         options={{
           title: 'Favorites',
-          tabBarButton: (props) => (
-            <CustomTabButton
-              {...props}
-              iconName="heart-outline"
-              iconNameFocused="heart"
-              label="Favorites"
-            />
-          ),
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="heart.fill" color={color} />,
         }}
       />
     </Tabs>

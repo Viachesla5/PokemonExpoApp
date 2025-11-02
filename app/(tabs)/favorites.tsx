@@ -81,7 +81,7 @@ export default function FavoritesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#E3F2FD',
   },
   containerDark: {
     backgroundColor: '#1a1a2e',
@@ -90,27 +90,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 20,
-    paddingBottom: 16,
-    backgroundColor: '#f0f8ff',
+    paddingBottom: 12,
+    backgroundColor: '#E3F2FD',
   },
   headerDark: {
     backgroundColor: '#1a1a2e',
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
     fontFamily: Fonts.bold,
-    color: '#0E0940',
+    color: '#000000',
     marginBottom: 4,
   },
   titleDark: {
     color: '#FFFFFF',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Fonts.regular,
-    color: '#666',
+    color: '#666666',
   },
   subtitleDark: {
     color: '#CCCCCC',
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     fontFamily: Fonts.regular,
-    color: '#EF5350',
+    color: '#666666',
   },
   textDark: {
     color: '#FFFFFF',
@@ -137,30 +137,30 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   emptyText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: Fonts.bold,
-    color: '#666',
+    color: '#000000',
     marginBottom: 8,
     textAlign: 'center',
   },
   emptySubtext: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Fonts.regular,
-    color: '#999',
+    color: '#666666',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   emptySubtextDark: {
     color: '#CCCCCC',
   },
   listHeader: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 12,
   },
   listHeaderText: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: Fonts.semiBold,
-    color: '#0E0940',
+    color: '#000000',
   },
   listHeaderTextDark: {
     color: '#FFFFFF',
