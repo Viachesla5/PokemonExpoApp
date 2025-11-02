@@ -11,3 +11,4 @@ export const pokemonData = [
   { id: 10, name: "Mew", type: "Psychic" },
 ];
 
+

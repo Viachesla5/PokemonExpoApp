@@ -123,6 +123,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 16,
     paddingBottom: 20,
+    paddingTop: 8,
   },
   row: {
     justifyContent: 'space-between',
@@ -192,12 +193,15 @@ const styles = StyleSheet.create({
   pokemonName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333333',
+    color: '#212121',
     marginBottom: 4,
+    textAlign: 'center',
+    textTransform: 'capitalize',
   },
   pokemonType: {
     fontSize: 12,
-    color: '#666666',
+    color: '#757575',
+    textAlign: 'center',
   },
   footerLoader: {
     paddingVertical: 20,

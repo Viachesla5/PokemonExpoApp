@@ -1,25 +1,26 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, Stack } from 'expo-router';
-import { usePokemonByName } from '@/hooks/use-pokemon';
+import { useLocalSearchParams, Stack, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { usePokemonByName, usePokemonSpecies, useEvolutionChain } from '@/hooks/use-pokemon';
 import { PokemonImage } from '@/components/ui/pokemon-image';
 import { PokemonSkeleton } from '@/components/ui/pokemon-skeleton';
-import Favorite from '@/components/ui/favorite';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import FavoriteHeader from '@/components/ui/favorite-header';
+import { PokeApiService } from '@/services/pokemon-api';
 
-const getTypeColor = (typeName: string): string => {
+const getTypeCircleColor = (typeName: string): string => {
   const typeColors: { [key: string]: string } = {
-    electric: '#FDD835',
-    fire: '#F44336',
+    electric: '#FFCB05',
+    fire: '#FF0000',
     water: '#2196F3',
-    grass: '#4CAF50',
-    ghost: '#9C27B0',
+    grass: '#6CBB5C',
+    ghost: '#A33EA1',
     psychic: '#E91E63',
     normal: '#A8A878',
     fighting: '#C03028',
     flying: '#A890F0',
-    poison: '#A040A0',
+    poison: '#A33EA1',
     ground: '#E0C068',
     rock: '#B8A038',
     bug: '#A8B820',
@@ -32,21 +33,139 @@ const getTypeColor = (typeName: string): string => {
   return typeColors[typeName.toLowerCase()] || '#757575';
 };
 
+type TabType = 'about' | 'stats' | 'evolution';
+
+interface EvolutionChainItem {
+  name: string;
+  id: number;
+}
+
+async function fetchPokemonIdFromSpecies(speciesName: string): Promise<number | null> {
+  try {
+    const pokemon = await PokeApiService.getPokemonByName(speciesName);
+    return pokemon?.id || null;
+  } catch (error) {
+    console.error(`Error fetching Pokemon ID for ${speciesName}:`, error);
+    return null;
+  }
+}
+
+async function parseEvolutionChainAsync(chain: any): Promise<EvolutionChainItem[]> {
+  const evolutions: EvolutionChainItem[] = [];
+  
+  async function traverse(current: any) {
+    if (!current) return;
+    
+    if (current?.species) {
+      const speciesName = current.species.name;
+      if (speciesName) {
+        const pokemonId = await fetchPokemonIdFromSpecies(speciesName);
+        if (pokemonId) {
+          evolutions.push({
+            name: speciesName,
+            id: pokemonId,
+          });
+        }
+      }
+    }
+    
+    if (current?.evolves_to && Array.isArray(current.evolves_to) && current.evolves_to.length > 0) {
+      for (const next of current.evolves_to) {
+        await traverse(next);
+      }
+    }
+  }
+  
+  if (chain) {
+    await traverse(chain);
+  }
+  
+  return evolutions;
+}
+
 export default function PokemonDetailScreen() {
   const { name } = useLocalSearchParams<{ name: string }>();
+  const [activeTab, setActiveTab] = useState<TabType>('about');
   const { data: pokemon, isLoading, error } = usePokemonByName(name as string);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  
+  const speciesUrl = useMemo(() => {
+    if (!pokemon?.species) {
+      console.log('No species found in pokemon:', pokemon);
+      return null;
+    }
+    if (typeof pokemon.species === 'string') return pokemon.species;
+    if (typeof pokemon.species === 'object' && 'url' in pokemon.species) {
+      const url = pokemon.species.url || null;
+      console.log('Species URL extracted:', url);
+      return url;
+    }
+    console.log('Species is not in expected format:', pokemon.species);
+    return null;
+  }, [pokemon]);
+  
+  const { data: species, isLoading: isLoadingSpecies, error: speciesError } = usePokemonSpecies(speciesUrl);
+  
+  useEffect(() => {
+    if (speciesError) {
+      console.error('Error fetching species:', speciesError);
+    }
+    if (species) {
+      console.log('Species data:', species);
+      console.log('Evolution chain URL:', species?.evolution_chain?.url);
+    }
+  }, [species, speciesError]);
+  
+  const evolutionChainUrl = useMemo(() => {
+    const url = species?.evolution_chain?.url || null;
+    console.log('Evolution chain URL from species:', url);
+    return url;
+  }, [species]);
+  
+  const { data: evolutionChainData, isLoading: isLoadingEvolution, error: evolutionError } = useEvolutionChain(evolutionChainUrl);
+  
+  useEffect(() => {
+    if (evolutionError) {
+      console.error('Error fetching evolution chain:', evolutionError);
+    }
+    if (evolutionChainData) {
+      console.log('Evolution chain data:', evolutionChainData);
+      console.log('Chain:', evolutionChainData?.chain);
+    }
+  }, [evolutionChainData, evolutionError]);
+  const [evolutionChain, setEvolutionChain] = useState<EvolutionChainItem[]>([]);
+  const [isParsingEvolution, setIsParsingEvolution] = useState(false);
+
+  useEffect(() => {
+    const loadEvolutionChain = async () => {
+      if (evolutionChainData?.chain) {
+        console.log('Starting to parse evolution chain:', evolutionChainData.chain);
+        setIsParsingEvolution(true);
+        try {
+          const parsed = await parseEvolutionChainAsync(evolutionChainData.chain);
+          console.log('Parsed evolution chain:', parsed);
+          setEvolutionChain(parsed);
+        } catch (error) {
+          console.error('Error parsing evolution chain:', error);
+          setEvolutionChain([]);
+        } finally {
+          setIsParsingEvolution(false);
+        }
+      } else {
+        console.log('No evolution chain data available');
+        setEvolutionChain([]);
+        setIsParsingEvolution(false);
+      }
+    };
+
+    loadEvolutionChain();
+  }, [evolutionChainData]);
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+      <SafeAreaView style={styles.container}>
         <Stack.Screen
           options={{
-            title: 'Loading...',
-            headerStyle: { backgroundColor: isDark ? '#C62828' : '#EF5350' },
-            headerTintColor: '#FFFFFF',
-            headerTitleStyle: { fontWeight: 'bold' },
+            headerShown: false,
           }}
         />
         <ScrollView style={styles.scrollView}>
@@ -58,13 +177,10 @@ export default function PokemonDetailScreen() {
 
   if (error || !pokemon) {
     return (
-      <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+      <SafeAreaView style={styles.container}>
         <Stack.Screen
           options={{
-            title: 'Pokémon Not Found',
-            headerStyle: { backgroundColor: isDark ? '#C62828' : '#EF5350' },
-            headerTintColor: '#FFFFFF',
-            headerTitleStyle: { fontWeight: 'bold' },
+            headerShown: false,
           }}
         />
         <View style={styles.errorContainer}>
@@ -75,95 +191,249 @@ export default function PokemonDetailScreen() {
   }
 
   const pokemonDisplayName = pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
+  const formattedId = pokemon.id.toString().padStart(3, '0');
   const heightInMeters = (pokemon.height / 10).toFixed(1);
   const weightInKg = (pokemon.weight / 10).toFixed(1);
+  const baseExperience = pokemon.base_experience || 0;
+
   const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
 
-  return (
-    <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
-      <Stack.Screen
-        options={{
-          title: pokemonDisplayName,
-          headerStyle: { backgroundColor: isDark ? '#C62828' : '#EF5350' },
-          headerTintColor: '#FFFFFF',
-          headerTitleStyle: { fontWeight: 'bold' },
-          headerRight: () => (
-            <View style={styles.headerRight}>
-              <Favorite
-                pokemonId={pokemon.id}
-                pokemonName={pokemon.name}
-                imageUrl={imageUrl}
-              />
-            </View>
-          ),
-        }}
-      />
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <Text style={[styles.pokemonName, isDark && styles.pokemonNameDark]}>
-            {pokemonDisplayName}
-          </Text>
-          <Text style={[styles.pokemonId, isDark && styles.pokemonIdDark]}>
-            #{pokemon.id.toString().padStart(3, '0')}
-          </Text>
-        </View>
-        
-        <View style={[styles.imageContainer, isDark && styles.imageContainerDark]}>
-          <PokemonImage id={pokemon.id} size={200} />
-        </View>
-        
-        <View style={[styles.detailsContainer, isDark && styles.detailsContainerDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Types</Text>
-          <View style={styles.typesContainer}>
-            {pokemon.types.map((typeInfo, index) => {
-              const typeColor = getTypeColor(typeInfo.type.name);
-              return (
-                <View key={index} style={[styles.typeBadge, { backgroundColor: typeColor }]}>
-                  <Text style={styles.typeText}>
-                    {typeInfo.type.name.charAt(0).toUpperCase() + 
-                     typeInfo.type.name.slice(1)}
-                  </Text>
+  const renderAboutTab = () => (
+    <View style={styles.tabContent}>
+      <View style={styles.detailRow}>
+        <Text style={styles.detailKey}>Name</Text>
+        <Text style={styles.detailValue}>{pokemonDisplayName}</Text>
+      </View>
+      <View style={styles.detailRow}>
+        <Text style={styles.detailKey}>ID</Text>
+        <Text style={styles.detailValue}>{formattedId}</Text>
+      </View>
+      <View style={styles.detailRow}>
+        <Text style={styles.detailKey}>Base</Text>
+        <Text style={styles.detailValue}>{baseExperience} XP</Text>
+      </View>
+      <View style={styles.detailRow}>
+        <Text style={styles.detailKey}>Weight</Text>
+        <Text style={styles.detailValue}>{weightInKg.replace('.', ',')} kg</Text>
+      </View>
+      <View style={styles.detailRow}>
+        <Text style={styles.detailKey}>Height</Text>
+        <Text style={styles.detailValue}>{heightInMeters.replace('.', ',')} m</Text>
+      </View>
+      <View style={styles.detailRow}>
+        <Text style={styles.detailKey}>Types</Text>
+        <Text style={styles.detailValue}>
+          {pokemon.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)).join(', ')}
+        </Text>
+      </View>
+      <View style={styles.detailRow}>
+        <Text style={styles.detailKey}>Abilities</Text>
+        <Text style={styles.detailValue}>
+          {pokemon.abilities.map(a => a.ability.name.charAt(0).toUpperCase() + a.ability.name.slice(1)).join(', ')}
+        </Text>
+      </View>
+    </View>
+  );
+
+  const renderStatsTab = () => {
+    const maxStat = 200;
+    const statMapping: { [key: string]: string } = {
+      'hp': 'HP',
+      'attack': 'Attack',
+      'defense': 'Defense',
+      'special-attack': 'Special Attack',
+      'special-defense': 'Special Defense',
+      'speed': 'Speed',
+    };
+    
+    const orderedStats = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
+    
+    return (
+      <View style={styles.tabContent}>
+        {orderedStats.map((statKey) => {
+          const stat = pokemon.stats.find(s => s.stat.name === statKey);
+          if (!stat) return null;
+          
+          const statValue = stat.base_stat;
+          const percentage = (statValue / maxStat) * 100;
+          const statName = statMapping[statKey] || stat.stat.name;
+          
+          return (
+            <View key={statKey} style={styles.statRow}>
+              <Text style={styles.statName}>{statName}</Text>
+              <View style={styles.statBarContainer}>
+                <View style={styles.statBarBackground}>
+                  <View style={[styles.statBarFill, { width: `${percentage}%` }]} />
                 </View>
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={[styles.detailsContainer, isDark && styles.detailsContainerDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Stats</Text>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>Height</Text>
-              <Text style={[styles.statValue, isDark && styles.statValueDark]}>
-                {heightInMeters} m
-              </Text>
+              </View>
+              <Text style={styles.statValue}>{statValue}</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>Weight</Text>
-              <Text style={[styles.statValue, isDark && styles.statValueDark]}>
-                {weightInKg} kg
-              </Text>
-            </View>
-          </View>
-        </View>
+          );
+        })}
+      </View>
+    );
+  };
 
-        <View style={[styles.detailsContainer, isDark && styles.detailsContainerDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Abilities</Text>
-          <View style={styles.abilitiesContainer}>
-            {pokemon.abilities.map((abilityInfo, index) => (
-              <View 
-                key={index} 
-                style={[styles.abilityBadge, isDark && styles.abilityBadgeDark]}
-              >
-                <Text style={[styles.abilityText, isDark && styles.abilityTextDark]}>
-                  {abilityInfo.ability.name.charAt(0).toUpperCase() + 
-                   abilityInfo.ability.name.slice(1).replace('-', ' ')}
-                  {abilityInfo.is_hidden && ' (Hidden)'}
+  const renderEvolutionTab = () => {
+    if (isLoadingSpecies || isLoadingEvolution || isParsingEvolution) {
+      return (
+        <View style={styles.tabContent}>
+          <Text style={styles.noEvolutionText}>Loading evolution data...</Text>
+        </View>
+      );
+    }
+    
+    if (!speciesUrl) {
+      return (
+        <View style={styles.tabContent}>
+          <Text style={styles.noEvolutionText}>Species URL not available</Text>
+        </View>
+      );
+    }
+    
+    if (!species) {
+      return (
+        <View style={styles.tabContent}>
+          <Text style={styles.noEvolutionText}>Species data not available</Text>
+        </View>
+      );
+    }
+    
+    if (!evolutionChainUrl) {
+      return (
+        <View style={styles.tabContent}>
+          <Text style={styles.noEvolutionText}>Evolution chain URL not found in species data</Text>
+        </View>
+      );
+    }
+    
+    if (!evolutionChainData) {
+      return (
+        <View style={styles.tabContent}>
+          <Text style={styles.noEvolutionText}>Evolution chain data not loaded</Text>
+        </View>
+      );
+    }
+    
+    if (evolutionChain.length === 0 && !isParsingEvolution) {
+      return (
+        <View style={styles.tabContent}>
+          <Text style={styles.noEvolutionText}>No evolution chain available for this Pokémon</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.tabContent}>
+        {evolutionChain.map((evolution, index) => (
+          <View key={evolution.id}>
+            <View style={styles.evolutionCard}>
+              <PokemonImage id={evolution.id} size={80} />
+              <View style={styles.evolutionInfo}>
+                <View style={styles.evolutionIdBadge}>
+                  <Text style={styles.evolutionIdText}>{evolution.id.toString().padStart(3, '0')}</Text>
+                </View>
+                <Text style={styles.evolutionName}>
+                  {evolution.name.charAt(0).toUpperCase() + evolution.name.slice(1)}
                 </Text>
               </View>
-            ))}
+            </View>
+            {index < evolutionChain.length - 1 && (
+              <View style={styles.evolutionConnector}>
+                {[0, 1, 2, 3].map((i) => (
+                  <View key={i} style={styles.evolutionDot} />
+                ))}
+              </View>
+            )}
           </View>
+        ))}
+      </View>
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+      />
+      
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#212121" />
+        </Pressable>
+        
+        <View style={styles.headerRight}>
+          <FavoriteHeader
+            pokemonId={pokemon.id}
+            pokemonName={pokemon.name}
+            imageUrl={imageUrl}
+          />
+          <Text style={styles.headerId}>{formattedId}</Text>
         </View>
+      </View>
+
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.nameContainer}>
+          <Text style={styles.pokemonName}>{pokemonDisplayName}</Text>
+        </View>
+
+        <View style={styles.typeContainer}>
+          {pokemon.types.map((typeInfo, index) => {
+            const typeColor = getTypeCircleColor(typeInfo.type.name);
+            return (
+              <View key={index} style={styles.typeTag}>
+                <View style={[styles.typeCircle, { backgroundColor: typeColor }]} />
+                <Text style={styles.typeText}>
+                  {typeInfo.type.name.charAt(0).toUpperCase() + typeInfo.type.name.slice(1)}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+
+        <View style={styles.imageContainer}>
+          <PokemonImage id={pokemon.id} size={280} />
+        </View>
+
+        <View style={styles.tabsContainer}>
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => setActiveTab('about')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.tabText, activeTab === 'about' && styles.tabTextActive]}>
+              About
+            </Text>
+            {activeTab === 'about' && <View style={styles.tabUnderline} />}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => setActiveTab('stats')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.tabText, activeTab === 'stats' && styles.tabTextActive]}>
+              Stats
+            </Text>
+            {activeTab === 'stats' && <View style={styles.tabUnderline} />}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => setActiveTab('evolution')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.tabText, activeTab === 'evolution' && styles.tabTextActive]}>
+              Evolution
+            </Text>
+            {activeTab === 'evolution' && <View style={styles.tabUnderline} />}
+          </TouchableOpacity>
+        </View>
+        <View style={styles.tabSeparator} />
+
+        {activeTab === 'about' && renderAboutTab()}
+        {activeTab === 'stats' && renderStatsTab()}
+        {activeTab === 'evolution' && renderEvolutionTab()}
       </ScrollView>
     </SafeAreaView>
   );
@@ -172,13 +442,209 @@ export default function PokemonDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f8ff',
-  },
-  containerDark: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#F8F9FA',
   },
   scrollView: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  backButton: {
+    padding: 4,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
+  },
+  headerId: {
+    fontSize: 16,
+    color: '#A4A4A4',
+    marginTop: 4,
+  },
+  nameContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  pokemonName: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#212121',
+    textTransform: 'capitalize',
+  },
+  typeContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    gap: 8,
+  },
+  typeTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E9ECEF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  typeCircle: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  typeText: {
+    fontSize: 14,
+    color: '#212121',
+    fontWeight: '500',
+    textTransform: 'capitalize',
+  },
+  imageContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    marginBottom: 20,
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  tabText: {
+    fontSize: 16,
+    color: '#A4A4A4',
+    fontWeight: '500',
+  },
+  tabTextActive: {
+    color: '#212121',
+    fontWeight: '600',
+  },
+  tabUnderline: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: '#6C79DB',
+    marginHorizontal: 8,
+  },
+  tabSeparator: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  tabContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 0,
+  },
+  detailKey: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#212121',
+  },
+  detailValue: {
+    fontSize: 16,
+    color: '#212121',
+    fontWeight: '400',
+    textTransform: 'capitalize',
+  },
+  statRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
+  },
+  statName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#212121',
+    width: 100,
+  },
+  statBarContainer: {
+    flex: 1,
+    height: 8,
+    justifyContent: 'center',
+  },
+  statBarBackground: {
+    height: 8,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  statBarFill: {
+    height: '100%',
+    backgroundColor: '#6C79DB',
+    borderRadius: 4,
+  },
+  statValue: {
+    fontSize: 16,
+    color: '#A4A4A4',
+    width: 40,
+    textAlign: 'right',
+  },
+  evolutionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  evolutionInfo: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  evolutionIdBadge: {
+    backgroundColor: '#6C79DB',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  evolutionIdText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  evolutionName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#212121',
+    textTransform: 'capitalize',
+  },
+  evolutionConnector: {
+    alignItems: 'center',
+    marginVertical: 8,
+    flexDirection: 'column',
+    gap: 4,
+  },
+  evolutionDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#E0E0E0',
   },
   errorContainer: {
     flex: 1,
@@ -187,129 +653,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: '#FFFFFF',
+    color: '#212121',
   },
-  header: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-  },
-  pokemonName: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#0E0940',
-    textTransform: 'capitalize',
-  },
-  pokemonNameDark: {
-    color: '#FFFFFF',
-  },
-  pokemonId: {
-    fontSize: 18,
-    color: '#666',
-    marginTop: 4,
-  },
-  pokemonIdDark: {
-    color: '#CCCCCC',
-  },
-  imageContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  imageContainerDark: {
-    backgroundColor: '#2A2A3E',
-  },
-  detailsContainer: {
-    padding: 16,
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  detailsContainerDark: {
-    backgroundColor: '#2A2A3E',
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#0E0940',
-    marginBottom: 12,
-  },
-  sectionTitleDark: {
-    color: '#FFFFFF',
-  },
-  typesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  typeBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  typeText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textTransform: 'capitalize',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    gap: 16,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-    fontWeight: '500',
-  },
-  statLabelDark: {
-    color: '#CCCCCC',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#0E0940',
-  },
-  statValueDark: {
-    color: '#FFFFFF',
-  },
-  abilitiesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  abilityBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 20,
-  },
-  abilityBadgeDark: {
-    backgroundColor: '#3A3A3A',
-  },
-  abilityText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#0E0940',
-    textTransform: 'capitalize',
-  },
-  abilityTextDark: {
-    color: '#FFFFFF',
-  },
-  headerRight: {
-    marginRight: 8,
+  noEvolutionText: {
+    fontSize: 16,
+    color: '#A4A4A4',
+    textAlign: 'center',
+    paddingVertical: 40,
   },
 });
-

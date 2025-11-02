@@ -1,17 +1,18 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { Platform } from 'react-native';
 import { useIsFavorite } from '@/hooks/use-favorites';
 import { useToggleFavorite } from '@/hooks/use-favorites';
 
-interface FavoriteProps {
+interface FavoriteHeaderProps {
   pokemonId: number;
   pokemonName: string;
   imageUrl?: string;
 }
 
-export default function Favorite({ pokemonId, pokemonName, imageUrl }: FavoriteProps) {
+export default function FavoriteHeader({ pokemonId, pokemonName, imageUrl }: FavoriteHeaderProps) {
   const { data: isFavorited, isLoading } = useIsFavorite(pokemonId);
   const toggleFavorite = useToggleFavorite();
 
@@ -36,24 +37,17 @@ export default function Favorite({ pokemonId, pokemonName, imageUrl }: FavoriteP
     });
   };
 
-  if (isLoading) {
-    return (
-      <TouchableOpacity style={styles.favoriteButton} disabled>
-        <ActivityIndicator size="small" color="#666" />
-      </TouchableOpacity>
-    );
-  }
-
   return (
     <TouchableOpacity
-      style={styles.favoriteButton}
       onPress={handleToggle}
-      disabled={toggleFavorite.isPending}
+      disabled={toggleFavorite.isPending || isLoading}
+      style={styles.favoriteButton}
+      activeOpacity={0.7}
     >
       <Ionicons
         name={isFavorited ? "heart" : "heart-outline"}
         size={24}
-        color={isFavorited ? "#FF6B6B" : "#666"}
+        color={isFavorited ? "#FF0000" : "#212121"}
       />
     </TouchableOpacity>
   );
@@ -61,20 +55,8 @@ export default function Favorite({ pokemonId, pokemonName, imageUrl }: FavoriteP
 
 const styles = StyleSheet.create({
   favoriteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    padding: 4,
   },
 });
+
 
