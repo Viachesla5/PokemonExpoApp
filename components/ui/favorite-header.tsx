@@ -1,10 +1,8 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
-import { useIsFavorite } from '@/hooks/use-favorites';
-import { useToggleFavorite } from '@/hooks/use-favorites';
+import { useIsFavorite, useToggleFavorite } from '@/hooks/use-favorites';
 
 interface FavoriteHeaderProps {
   pokemonId: number;

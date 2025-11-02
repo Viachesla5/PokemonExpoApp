@@ -2,8 +2,7 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useIsFavorite } from '@/hooks/use-favorites';
-import { useToggleFavorite } from '@/hooks/use-favorites';
+import { useIsFavorite, useToggleFavorite } from '@/hooks/use-favorites';
 
 interface FavoriteProps {
   pokemonId: number;

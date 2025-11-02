@@ -1,14 +1,17 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Pressable, Share, Alert, Platform } from 'react-native';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Pressable, Share, Alert, Platform, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
 import { usePokemonByName, usePokemonSpecies, useEvolutionChain } from '@/hooks/use-pokemon';
 import { PokemonImage } from '@/components/ui/pokemon-image';
 import { PokemonSkeleton } from '@/components/ui/pokemon-skeleton';
 import FavoriteHeader from '@/components/ui/favorite-header';
 import { PokeApiService } from '@/services/pokemon-api';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const getTypeCircleColor = (typeName: string): string => {
   const typeColors: { [key: string]: string } = {
@@ -87,6 +90,8 @@ async function parseEvolutionChainAsync(chain: any): Promise<EvolutionChainItem[
 export default function PokemonDetailScreen() {
   const { name } = useLocalSearchParams<{ name: string }>();
   const [activeTab, setActiveTab] = useState<TabType>('about');
+  const translateX = useRef(new Animated.Value(0)).current;
+  const tabAnimatedValue = useRef(new Animated.Value(0)).current;
   const { data: pokemon, isLoading, error } = usePokemonByName(name as string);
   
   const speciesUrl = useMemo(() => {
@@ -129,6 +134,18 @@ export default function PokemonDetailScreen() {
 
     loadEvolutionChain();
   }, [evolutionChainData]);
+
+  useEffect(() => {
+    const tabs: TabType[] = ['about', 'stats', 'evolution'];
+    const currentIndex = tabs.indexOf(activeTab);
+    
+    Animated.spring(tabAnimatedValue, {
+      toValue: currentIndex,
+      tension: 50,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+  }, [activeTab, tabAnimatedValue]);
 
   if (isLoading) {
     return (
@@ -358,18 +375,49 @@ export default function PokemonDetailScreen() {
     }
   };
 
+  const handleSwipe = (event: any) => {
+    const { state, translationX } = event.nativeEvent;
+
+    if (state === State.ACTIVE) {
+      translateX.setValue(translationX);
+    } else if (state === State.END) {
+      const tabs: TabType[] = ['about', 'stats', 'evolution'];
+      const currentIndex = tabs.indexOf(activeTab);
+
+      if (translationX < -50 && currentIndex < tabs.length - 1) {
+        setActiveTab(tabs[currentIndex + 1]);
+        if (Platform.OS === 'ios') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      } else if (translationX > 50 && currentIndex > 0) {
+        setActiveTab(tabs[currentIndex - 1]);
+        if (Platform.OS === 'ios') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      }
+
+      Animated.spring(translateX, {
+        toValue: 0,
+        tension: 50,
+        friction: 8,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
-      
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#212121" />
-        </Pressable>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        <Stack.Screen
+          options={{
+            headerShown: false,
+          }}
+        />
+        
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#212121" />
+          </Pressable>
         
         <View style={styles.headerRight}>
           <View style={styles.headerActions}>
@@ -386,7 +434,11 @@ export default function PokemonDetailScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollView} 
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+      >
         <View style={styles.nameContainer}>
           <Text style={styles.pokemonName}>{pokemonDisplayName}</Text>
         </View>
@@ -443,11 +495,65 @@ export default function PokemonDetailScreen() {
         </View>
         <View style={styles.tabSeparator} />
 
-        {activeTab === 'about' && renderAboutTab()}
-        {activeTab === 'stats' && renderStatsTab()}
-        {activeTab === 'evolution' && renderEvolutionTab()}
+        <PanGestureHandler
+          onHandlerStateChange={handleSwipe}
+          activeOffsetX={[-10, 10]}
+        >
+          <Animated.View
+            style={{
+              transform: [
+                {
+                  translateX: Animated.add(
+                    translateX,
+                    tabAnimatedValue.interpolate({
+                      inputRange: [0, 1, 2],
+                      outputRange: [0, -SCREEN_WIDTH, -SCREEN_WIDTH * 2],
+                    })
+                  ),
+                },
+              ],
+              flexDirection: 'row',
+              width: SCREEN_WIDTH * 3,
+            }}
+          >
+            <Animated.View
+              style={{
+                width: SCREEN_WIDTH,
+                opacity: tabAnimatedValue.interpolate({
+                  inputRange: [0, 0.5, 1],
+                  outputRange: [1, 0.3, 0],
+                }),
+              }}
+            >
+              {renderAboutTab()}
+            </Animated.View>
+            <Animated.View
+              style={{
+                width: SCREEN_WIDTH,
+                opacity: tabAnimatedValue.interpolate({
+                  inputRange: [0, 1, 2],
+                  outputRange: [0, 1, 0],
+                }),
+              }}
+            >
+              {renderStatsTab()}
+            </Animated.View>
+            <Animated.View
+              style={{
+                width: SCREEN_WIDTH,
+                opacity: tabAnimatedValue.interpolate({
+                  inputRange: [1, 1.5, 2],
+                  outputRange: [0, 0.3, 1],
+                }),
+              }}
+            >
+              {renderEvolutionTab()}
+            </Animated.View>
+          </Animated.View>
+        </PanGestureHandler>
       </ScrollView>
     </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 

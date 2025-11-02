@@ -10,7 +10,7 @@
   - [x] Must be able to navigate to the Pokémon details page from the list.
   - [x] Must be able to favorite the Pokémon.
   - [x] Must display type(s) for the Pokémon and use a unique color for each type.
-  - [ ] Pokémon detail tabs should be swipeable left and right.
+  - [x] Pokémon detail tabs should be swipeable left and right.
 - [x] Favorites list is displayed in a FlatList.
   - [x] Must be able to navigate to the Pokémon details page from the favorites list.
   - [x] Must be able to unfavorite the Pokémon.
@@ -29,7 +29,7 @@
 - [x] Expo Router for navigation.
 - [x] SQLite for local storage.
 - [x] Uses Typescript with no TS errors.
-- [ ] Uses ESLint with no ESLint errors. (ideally use [React Compiler Linter](https://docs.expo.dev/guides/react-compiler/#enabling-the-linter))
+- [x] Uses ESLint with no ESLint errors. (ideally use [React Compiler Linter](https://docs.expo.dev/guides/react-compiler/#enabling-the-linter))
 - [x] Uses Separation of Concerns (determine a project structure that follows this principle).
 - [ ] Expo Font is used to implement [the font](./assets/fonts.zip).
 

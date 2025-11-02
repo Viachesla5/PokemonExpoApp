@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePokemonList } from '@/hooks/use-pokemon';
 import PokemonList from '@/components/ui/pokemon-list';
 import type { Pokemon } from '@/components/ui/pokemon-list';
 
 export default function AllPokemonScreen() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState('');
   const { 
     data, 
@@ -19,6 +16,30 @@ export default function AllPokemonScreen() {
     isFetchingNextPage, 
     hasNextPage 
   } = usePokemonList(20);
+
+  const pokemonData: Pokemon[] = React.useMemo(() => {
+    const allPokemon = (data?.pages || []).flatMap((page) =>
+      page.results.map((item) => ({
+        id: parseInt(item.id, 10),
+        name: item.name,
+        type: 'Normal',
+      }))
+    );
+    
+    const uniquePokemon = Array.from(
+      new Map(allPokemon.map((p) => [p.id, p])).values()
+    );
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      return uniquePokemon.filter((pokemon) =>
+        pokemon.name.toLowerCase().includes(query) ||
+        pokemon.id.toString().includes(query)
+      );
+    }
+    
+    return uniquePokemon;
+  }, [data, searchQuery]);
 
   if (isLoading) {
     return (
@@ -44,30 +65,6 @@ export default function AllPokemonScreen() {
       </SafeAreaView>
     );
   }
-
-  const pokemonData: Pokemon[] = React.useMemo(() => {
-    const allPokemon = (data?.pages || []).flatMap((page) =>
-      page.results.map((item) => ({
-        id: parseInt(item.id, 10),
-        name: item.name,
-        type: 'Normal',
-      }))
-    );
-    
-    const uniquePokemon = Array.from(
-      new Map(allPokemon.map((p) => [p.id, p])).values()
-    );
-    
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      return uniquePokemon.filter((pokemon) =>
-        pokemon.name.toLowerCase().includes(query) ||
-        pokemon.id.toString().includes(query)
-      );
-    }
-    
-    return uniquePokemon;
-  }, [data, searchQuery]);
 
   return (
     <SafeAreaView style={styles.container}>
