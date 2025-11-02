@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Pressable } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Pressable, Share, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { usePokemonByName, usePokemonSpecies, useEvolutionChain } from '@/hooks/use-pokemon';
 import { PokemonImage } from '@/components/ui/pokemon-image';
 import { PokemonSkeleton } from '@/components/ui/pokemon-skeleton';
@@ -297,7 +298,7 @@ export default function PokemonDetailScreen() {
         {evolutionChain.map((evolution, index) => (
           <View key={evolution.id}>
             <View style={styles.evolutionCard}>
-              <PokemonImage id={evolution.id} size={80} />
+              <PokemonImage id={evolution.id} size={80} variant="pixelated" />
               <View style={styles.evolutionInfo}>
                 <View style={styles.evolutionIdBadge}>
                   <Text style={styles.evolutionIdText}>{evolution.id.toString().padStart(3, '0')}</Text>
@@ -320,6 +321,43 @@ export default function PokemonDetailScreen() {
     );
   };
 
+  const handleShare = async () => {
+    try {
+      if (Platform.OS === 'ios') {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } else if (Platform.OS === 'android') {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+
+      const types = pokemon.types.map(t => t.type.name).join(', ');
+      const shareMessage = `Check out ${pokemonDisplayName}! 🎮\n\n` +
+        `#${formattedId}\n` +
+        `Type: ${types}\n` +
+        `Height: ${heightInMeters}m | Weight: ${weightInKg}kg\n` +
+        `Base XP: ${baseExperience}\n\n` +
+        `${imageUrl}`;
+
+      const result = await Share.share({
+        message: shareMessage,
+        title: `${pokemonDisplayName} - Pokédex`,
+        url: imageUrl,
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log(`Shared via ${result.activityType}`);
+        } else {
+          console.log('Shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', 'Failed to share Pokémon');
+      console.error('Share error:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen
@@ -334,11 +372,16 @@ export default function PokemonDetailScreen() {
         </Pressable>
         
         <View style={styles.headerRight}>
-          <FavoriteHeader
-            pokemonId={pokemon.id}
-            pokemonName={pokemon.name}
-            imageUrl={imageUrl}
-          />
+          <View style={styles.headerActions}>
+            <Pressable onPress={handleShare} style={styles.shareButton}>
+              <Ionicons name="share-social-outline" size={24} color="#212121" />
+            </Pressable>
+            <FavoriteHeader
+              pokemonId={pokemon.id}
+              pokemonName={pokemon.name}
+              imageUrl={imageUrl}
+            />
+          </View>
           <Text style={styles.headerId}>{formattedId}</Text>
         </View>
       </View>
@@ -429,6 +472,14 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     alignItems: 'flex-end',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  shareButton: {
+    padding: 4,
   },
   headerId: {
     fontSize: 16,

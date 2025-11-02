@@ -49,7 +49,7 @@ const PokemonCard = React.memo(({ item, onPress }: PokemonCardProps) => {
           </View>
         </View>
         <View style={styles.imageWrapper}>
-          <PokemonImage id={item.id} size={100} />
+          <PokemonImage id={item.id} size={140} variant="pixelated" />
         </View>
       </View>
       <View style={styles.cardNameSection}>
