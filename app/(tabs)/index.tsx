@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { usePokemonList } from '@/hooks/use-pokemon';
+import { usePokemonList, useAllPokemonForSearch } from '@/hooks/use-pokemon';
 import PokemonList from '@/components/ui/pokemon-list';
 import type { Pokemon } from '@/components/ui/pokemon-list';
 import { Fonts } from '@/constants/fonts';
@@ -18,7 +18,25 @@ export default function AllPokemonScreen() {
     hasNextPage 
   } = usePokemonList(20);
 
+  const { data: allPokemonData } = useAllPokemonForSearch();
+
   const pokemonData: Pokemon[] = React.useMemo(() => {
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const searchList = allPokemonData?.results || [];
+      
+      return searchList
+        .filter((item) =>
+          item.name.toLowerCase().includes(query) ||
+          item.id.toString().includes(query)
+        )
+        .map((item) => ({
+          id: parseInt(item.id, 10),
+          name: item.name,
+          type: 'Normal',
+        }));
+    }
+
     const allPokemon = (data?.pages || []).flatMap((page) =>
       page.results.map((item) => ({
         id: parseInt(item.id, 10),
@@ -31,16 +49,8 @@ export default function AllPokemonScreen() {
       new Map(allPokemon.map((p) => [p.id, p])).values()
     );
     
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      return uniquePokemon.filter((pokemon) =>
-        pokemon.name.toLowerCase().includes(query) ||
-        pokemon.id.toString().includes(query)
-      );
-    }
-    
     return uniquePokemon;
-  }, [data, searchQuery]);
+  }, [data, searchQuery, allPokemonData]);
 
   if (isLoading) {
     return (

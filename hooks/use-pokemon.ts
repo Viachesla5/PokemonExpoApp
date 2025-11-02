@@ -40,6 +40,21 @@ export const usePokemonList = (limit: number = 20) => {
   });
 };
 
+export const useAllPokemonForSearch = () => {
+  return useQuery({
+    queryKey: ['all-pokemon'],
+    queryFn: async () => {
+      const response = await PokeApiService.listPokemons(0, 10000);
+      return {
+        ...response,
+        results: response.results.map(mapWithResourceId),
+      };
+    },
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+  });
+};
+
 export const usePokemonByName = (name: string) => {
   return useQuery({
     queryKey: ['pokemon', name],
