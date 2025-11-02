@@ -1,33 +1,83 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Image } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarActiveTintColor: '#0E0940',
+        tabBarInactiveTintColor: '#5C5C83',
+        tabBarStyle: {
+          backgroundColor: '#E3F2FD',
+          borderTopWidth: 0,
+          elevation: 12,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 8,
+          height: 80,
+          paddingBottom: 0,
+          paddingTop: 12,
+        },
+        tabBarItemStyle: {
+          padding: 0,
+          margin: 0,
+          height: 98,
+        },
+        tabBarLabelStyle: {
+          fontSize: 14,
+          fontWeight: '700',
+          marginTop: 4,
+          marginBottom: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Pokémons',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={
+                focused
+                  ? require('@/assets/images/active_icon_pokemons_page.png')
+                  : require('@/assets/images/inactive_icon_pokemons_page.png')
+              }
+              style={{ 
+                width: focused ? 78 : 30, 
+                height: focused ? 78 : 30,
+                tintColor: focused ? undefined : '#5C5C83'
+              }}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="favorites"
         options={{
           title: 'Favorites',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="heart.fill" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={
+                focused
+                  ? require('@/assets/images/active_icon_favorites_page.png')
+                  : require('@/assets/images/inactive_icon_favorites_page.png')
+              }
+              style={{ 
+                width: focused ? 78 : 30, 
+                height: focused ? 78 : 30,
+                tintColor: focused ? undefined : '#5C5C83'
+              }}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
     </Tabs>

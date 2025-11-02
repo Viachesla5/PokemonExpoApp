@@ -5,7 +5,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useFavorites } from '@/hooks/use-favorites';
 import PokemonList from '@/components/ui/pokemon-list';
 import type { Pokemon } from '@/components/ui/pokemon-list';
-import FavoritesStats from '@/components/ui/favorites-stats';
 import { Fonts } from '@/constants/fonts';
 
 export default function FavoritesScreen() {
@@ -62,15 +61,6 @@ export default function FavoritesScreen() {
       >
         <View style={[styles.header, isDark && styles.headerDark]}>
           <Text style={[styles.title, isDark && styles.titleDark]}>My Favorites</Text>
-          <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>
-            {favorites.length} {favorites.length === 1 ? 'Pokémon' : 'Pokémon'} saved
-          </Text>
-        </View>
-        <FavoritesStats favorites={favorites} />
-        <View style={styles.listHeader}>
-          <Text style={[styles.listHeaderText, isDark && styles.listHeaderTextDark]}>
-            Your Favorite Pokémon
-          </Text>
         </View>
         <PokemonList data={pokemonData} scrollEnabled={false} />
       </ScrollView>
