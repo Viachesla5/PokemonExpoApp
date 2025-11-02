@@ -38,11 +38,11 @@
 Each optional item is worth 1 extra point.
 
 - [ ] Use of animations (e.g. loading in UI elements).
-- [x] Dark mode support (making use of theming).
+- [ ] Dark mode support (making use of theming).
 - [x] Pokémon list is paginated and infinite scroll is used.
 - [ ] Clean Typescript: no use of `any`, typecasting `as SomeType`, or TS ignore comments.
 - [ ] Pixel Perfect Design on either iOS or Android.
-- [ ] No bugs, console errors and use of console.log.
+- [x] No bugs, console errors and use of console.log.
 - [ ] Added [localizations](https://docs.expo.dev/guides/localization/) for the app.
 - [ ] Adds Pokémon Battle Feature.
 
