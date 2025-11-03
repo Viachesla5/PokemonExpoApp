@@ -203,7 +203,7 @@ function PokemonMenu({ pokemon, visible, onClose, onNavigate }: PokemonMenuProps
         title: `${pokemonDisplayName} - Pokédex`,
         url: imageUrl,
       });
-    } catch (error) {
+    } catch {
       // Error handling
     }
   };

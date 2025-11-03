@@ -7,7 +7,6 @@ import {
   Pressable,
   Animated,
   Dimensions,
-  Alert,
   ImageBackground,
   ScrollView,
 } from 'react-native';
@@ -69,7 +68,7 @@ const calculateDamage = (attacker: BattlePokemon, defender: BattlePokemon): numb
 
 export default function BattleScreen() {
   const { name } = useLocalSearchParams<{ name: string }>();
-  const [playerPokemonName, setPlayerPokemonName] = useState<string>(name as string);
+  const playerPokemonName = name as string;
   const [opponentId, setOpponentId] = useState<number>(() => getRandomOpponent());
   
   const { data: pokemonData } = usePokemonByName(playerPokemonName);
@@ -86,11 +85,9 @@ export default function BattleScreen() {
   const [playerPokemon, setPlayerPokemon] = useState<BattlePokemon | null>(null);
   const [opponentPokemon, setOpponentPokemon] = useState<BattlePokemon | null>(null);
   const [turn, setTurn] = useState<'player' | 'opponent'>('player');
-  const [battleLog, setBattleLog] = useState<string[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [battleEnded, setBattleEnded] = useState(false);
   const [score, setScore] = useState(0);
-  const [wins, setWins] = useState(0);
   const [battleInitialized, setBattleInitialized] = useState(false);
 
   const playerShake = useRef(new Animated.Value(0)).current;
@@ -181,7 +178,6 @@ export default function BattleScreen() {
 
             shakeAnimation(playerShake).start(() => {
               setPlayerPokemon({ ...player, hp: newPlayerHp });
-              setBattleLog([`${opponent.name} dealt ${damage} damage!`]);
 
               if (newPlayerHp <= 0) {
                 handleDefeat();
@@ -194,7 +190,7 @@ export default function BattleScreen() {
         }
       });
     }
-  }, [pokemonData, opponentData, battleInitialized]);
+  }, [pokemonData, opponentData, battleInitialized, handleDefeat, opponentSlide, playerShake, playerSlide]);
 
   const shakeAnimation = (animValue: Animated.Value) => {
     return Animated.sequence([
@@ -226,9 +222,7 @@ export default function BattleScreen() {
     setIsAnimating(false);
     const points = 100;
     setScore(prev => prev + points);
-    setWins(prev => prev + 1);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setBattleLog(prev => [...prev, `Victory! +${points} points!`]);
     
     // Fade in victory overlay
     Animated.timing(battleResultOpacity, {
@@ -242,7 +236,6 @@ export default function BattleScreen() {
     setBattleEnded(true);
     setIsAnimating(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    setBattleLog(prev => [...prev, `Defeat!`]);
     
     // Fade in defeat overlay
     Animated.timing(battleResultOpacity, {
@@ -263,7 +256,6 @@ export default function BattleScreen() {
 
     shakeAnimation(playerShake).start(() => {
       setPlayerPokemon(prev => prev ? { ...prev, hp: newPlayerHp } : null);
-      setBattleLog(prev => [...prev, `${opponentPokemon.name} dealt ${damage} damage!`]);
 
       if (newPlayerHp <= 0) {
         handleDefeat();
@@ -285,7 +277,6 @@ export default function BattleScreen() {
 
     shakeAnimation(opponentShake).start(() => {
       setOpponentPokemon(prev => prev ? { ...prev, hp: newOpponentHp } : null);
-      setBattleLog(prev => [...prev, `${playerPokemon.name} dealt ${damage} damage!`]);
 
       if (newOpponentHp <= 0) {
         handleVictory();
@@ -294,23 +285,6 @@ export default function BattleScreen() {
       }
     });
   }, [playerPokemon, opponentPokemon, isAnimating, battleEnded, turn, opponentShake, handleVictory, opponentTurn]);
-
-  const handleNextBattle = useCallback(() => {
-    // Reset battle state
-    setBattleEnded(false);
-    setIsAnimating(false);
-    setBattleLog([]);
-    setBattleInitialized(false);
-    
-    // Reset animations
-    playerSlide.setValue(-SCREEN_WIDTH);
-    opponentSlide.setValue(SCREEN_WIDTH);
-    playerShake.setValue(0);
-    opponentShake.setValue(0);
-    
-    // Generate new opponent
-    setOpponentId(getRandomOpponent());
-  }, [playerSlide, opponentSlide, playerShake, opponentShake]);
 
   if (!playerPokemon || !opponentPokemon) {
     return (
@@ -457,7 +431,6 @@ export default function BattleScreen() {
                       setOpponentId(pokemon.id);
                       setBattleEnded(false);
                       setIsAnimating(false);
-                      setBattleLog([]);
                       setBattleInitialized(false);
                       playerSlide.setValue(-SCREEN_WIDTH);
                       opponentSlide.setValue(SCREEN_WIDTH);
