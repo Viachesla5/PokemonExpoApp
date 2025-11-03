@@ -411,14 +411,28 @@ export default function PokemonDetailScreen() {
             <Ionicons name="arrow-back" size={24} color="#212121" />
           </Pressable>
         
-          <Pressable onPress={handleShare} style={styles.shareButton}>
-            <Ionicons name="share-social-outline" size={24} color="#212121" />
-          </Pressable>
-          <FavoriteHeader
-            pokemonId={pokemon.id}
-            pokemonName={pokemon.name}
-            imageUrl={imageUrl}
-          />
+          <View style={styles.headerActions}>
+            <Pressable 
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push({
+                  pathname: '/battle/[name]',
+                  params: { name: pokemon.name }
+                });
+              }} 
+              style={styles.battleButton}
+            >
+              <Ionicons name="flash" size={24} color="#FFFFFF" />
+            </Pressable>
+            <Pressable onPress={handleShare} style={styles.iconButton}>
+              <Ionicons name="share-social-outline" size={24} color="#212121" />
+            </Pressable>
+            <FavoriteHeader
+              pokemonId={pokemon.id}
+              pokemonName={pokemon.name}
+              imageUrl={imageUrl}
+            />
+          </View>
         </View>
 
         <ScrollView 
@@ -584,11 +598,24 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 4,
-    marginRight: 'auto',
   },
-  shareButton: {
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  battleButton: {
+    backgroundColor: '#FF6B35',
+    padding: 8,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  iconButton: {
     padding: 4,
-    marginLeft: 'auto',
   },
   nameIdContainer: {
     flexDirection: 'row',
