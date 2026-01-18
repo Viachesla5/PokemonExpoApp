@@ -186,7 +186,7 @@ function PokemonMenu({ pokemon, visible, onClose, onNavigate }: PokemonMenuProps
   };
 
   const handleShare = async () => {
-    onClose();
+   // onClose();
     try {
       if (Platform.OS === 'ios') {
         await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
