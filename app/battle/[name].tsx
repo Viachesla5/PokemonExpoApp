@@ -119,6 +119,34 @@ export default function BattleScreen() {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const handleVictory = useCallback(() => {
+    setBattleEnded(true);
+    setIsAnimating(false);
+    const points = 100;
+    setScore(prev => prev + points);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    
+    // Fade in victory overlay
+    Animated.timing(battleResultOpacity, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, [battleResultOpacity]);
+
+  const handleDefeat = useCallback(() => {
+    setBattleEnded(true);
+    setIsAnimating(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    
+    // Fade in defeat overlay
+    Animated.timing(battleResultOpacity, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, [battleResultOpacity]);
+
   useEffect(() => {
     if (pokemonData && opponentData && !battleInitialized) {
       const player: BattlePokemon = {
@@ -216,34 +244,6 @@ export default function BattleScreen() {
       }),
     ]);
   };
-
-  const handleVictory = useCallback(() => {
-    setBattleEnded(true);
-    setIsAnimating(false);
-    const points = 100;
-    setScore(prev => prev + points);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    
-    // Fade in victory overlay
-    Animated.timing(battleResultOpacity, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  }, [battleResultOpacity]);
-
-  const handleDefeat = useCallback(() => {
-    setBattleEnded(true);
-    setIsAnimating(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    
-    // Fade in defeat overlay
-    Animated.timing(battleResultOpacity, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  }, [battleResultOpacity]);
 
   const opponentTurn = useCallback((currentOpponentHp: number) => {
     if (!playerPokemon || !opponentPokemon) return;
