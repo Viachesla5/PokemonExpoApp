@@ -49,8 +49,9 @@ async function fetchPokemonIdFromSpecies(speciesName: string): Promise<number | 
   try {
     const pokemon = await PokeApiService.getPokemonByName(speciesName);
     return pokemon?.id || null;
-  } catch (error) {
-    console.error(`Error fetching Pokemon ID for ${speciesName}:`, error);
+  } catch {
+    // Silently fail - evolution chain will just skip this Pokemon
+    // Error is already handled by React Query in the UI
     return null;
   }
 }
@@ -104,13 +105,13 @@ export default function PokemonDetailScreen() {
     return null;
   }, [pokemon]);
   
-  const { data: species, isLoading: isLoadingSpecies } = usePokemonSpecies(speciesUrl);
+  const { data: species, isLoading: isLoadingSpecies, error: errorSpecies } = usePokemonSpecies(speciesUrl);
   
   const evolutionChainUrl = useMemo(() => {
     return species?.evolution_chain?.url || null;
   }, [species]);
   
-  const { data: evolutionChainData, isLoading: isLoadingEvolution } = useEvolutionChain(evolutionChainUrl);
+  const { data: evolutionChainData, isLoading: isLoadingEvolution, error: errorEvolution } = useEvolutionChain(evolutionChainUrl);
   const [evolutionChain, setEvolutionChain] = useState<EvolutionChainItem[]>([]);
   const [isParsingEvolution, setIsParsingEvolution] = useState(false);
 
@@ -121,8 +122,9 @@ export default function PokemonDetailScreen() {
         try {
           const parsed = await parseEvolutionChainAsync(evolutionChainData.chain);
           setEvolutionChain(parsed);
-        } catch (error) {
-          console.error('Error parsing evolution chain:', error);
+        } catch {
+          // Silently fail - evolution chain will show empty state
+          // Error is already handled by React Query in the UI
           setEvolutionChain([]);
         } finally {
           setIsParsingEvolution(false);
@@ -267,6 +269,24 @@ export default function PokemonDetailScreen() {
       return (
         <View style={styles.tabContent}>
           <Text style={styles.noEvolutionText}>Loading evolution data...</Text>
+        </View>
+      );
+    }
+    
+    if (errorSpecies) {
+      return (
+        <View style={styles.tabContent}>
+          <Text style={styles.errorText}>Error loading species data</Text>
+          <Text style={styles.errorSubtext}>{errorSpecies.message || 'Unable to fetch Pokemon species information'}</Text>
+        </View>
+      );
+    }
+    
+    if (errorEvolution) {
+      return (
+        <View style={styles.tabContent}>
+          <Text style={styles.errorText}>Error loading evolution data</Text>
+          <Text style={styles.errorSubtext}>{errorEvolution.message || 'Unable to fetch evolution chain'}</Text>
         </View>
       );
     }
@@ -826,8 +846,18 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
+    fontFamily: Fonts.semiBold,
+    color: '#EF5350',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  errorSubtext: {
+    fontSize: 14,
     fontFamily: Fonts.regular,
-    color: '#212121',
+    color: '#A4A4A4',
+    textAlign: 'center',
+    marginTop: 8,
+    paddingHorizontal: 20,
   },
   noEvolutionText: {
     fontSize: 16,

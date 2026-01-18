@@ -7,7 +7,7 @@ import { HapticTab } from '@/components/haptic-tab';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  
+
   return (
     <Tabs
       screenOptions={{

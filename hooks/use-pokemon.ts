@@ -98,7 +98,8 @@ export const usePokemonSpecies = (speciesUrl: string | null) => {
         if (!response.ok) throw new Error('Failed to fetch species');
         return await response.json();
       } catch (error) {
-        console.error('Error fetching species:', error);
+        // Error is handled by React Query and displayed in UI
+        // Don't log to console to avoid triggering Expo's error overlay
         throw error;
       }
     },
